@@ -19,12 +19,12 @@ export class LauncherService implements AsyncDisposable {
   }
 
   async [Symbol.asyncDispose](): Promise<void> {
-    // TODO: exit service and close connection
     await this.disconnect()
   }
 
   async disconnect(): Promise<void> {
     if (this._socket !== undefined) {
+      await this.socket.write('quit\r\n')
       await this._socket.end()
       this._socket = undefined
     }

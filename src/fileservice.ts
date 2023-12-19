@@ -68,7 +68,6 @@ export class FileService implements AsyncDisposable {
   }
 
   async [Symbol.asyncDispose](): Promise<void> {
-    // TODO: exit service and close connection
     await this.disconnect()
   }
 

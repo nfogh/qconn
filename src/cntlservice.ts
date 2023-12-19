@@ -29,13 +29,13 @@ export class CntlService implements AsyncDisposable {
   }
 
   async [Symbol.asyncDispose](): Promise<void> {
-    // TODO: exit service and close connection
     await this.disconnect()
   }
 
   async disconnect(): Promise<void> {
     if (this._socket !== undefined) {
-      await this._socket.end()
+      await this.socket.write('quit\r\n')
+      await this.socket.end()
       this._socket = undefined
     }
   }
@@ -43,7 +43,7 @@ export class CntlService implements AsyncDisposable {
   static async connect(host: string, port: number = 8000): Promise<CntlService> {
     const service = new CntlService(host, port)
     service._socket = await newQConnClient(host, port)
-    await activateService(service._socket, 'launcher')
+    await activateService(service._socket, 'cntl')
     return service
   }
 
