@@ -24,7 +24,8 @@ export class LauncherService implements AsyncDisposable {
 
   async disconnect(): Promise<void> {
     if (this._socket !== undefined) {
-      await this.socket.write('quit\r\n')
+      // TODO: Figure out if we need to issue a 'quit' command here
+      // If we have executed a command, the remote end has probably already quit
       await this._socket.end()
       this._socket = undefined
     }

@@ -5,19 +5,19 @@ export class PacketizedSocket {
   private readonly socket: PromiseSocket<Socket>
   private receiveBuffer: Buffer = Buffer.alloc(0)
 
-  constructor (socket: PromiseSocket<Socket>) {
+  constructor(socket: PromiseSocket<Socket>) {
     this.socket = socket
   }
 
-  async write (data: Buffer | string): Promise<number> {
+  async write(data: Buffer | string): Promise<number> {
     return await this.socket.write(data)
   }
 
-  async end (): Promise<void> {
+  async end(): Promise<void> {
     await this.socket.end()
   }
 
-  async readUntilClose (timeout: number = 50000): Promise<Buffer> {
+  async readUntilClose(timeout: number = 50000): Promise<Buffer> {
     const t0 = Date.now()
 
     while (Date.now() < t0 + timeout) {
@@ -35,7 +35,7 @@ export class PacketizedSocket {
     throw (new Error('Timeout'))
   }
 
-  async read (endOfPacket: string | Buffer | number, timeout: number = 50000): Promise<Buffer> {
+  async read(endOfPacket: string | Buffer | number, timeout: number = 50000): Promise<Buffer> {
     const t0 = Date.now()
 
     while (Date.now() < t0 + timeout) {
