@@ -1,0 +1,51 @@
+{
+  "name": "qconn",
+  "version": "1.0.0",
+  "description": "QNX qconn utilities",
+  "main": "out/index.js",
+  "author": "Nikolaj Fogh",
+  "license": "MIT",
+  "files": [
+    "out/cntlservice.js",
+    "out/cntservice.d.ts",
+    "out/fileservice.js",
+    "out/fileservice.d.ts",
+    "out/launchservice.js",
+    "out/launchservice.d.ts",
+    "out/packetizedSocket.js",
+    "out/packetizedSocket.d.ts",
+    "out/qconnutil.js",
+    "out/qconnutil.d.ts",
+    "out/sinfoservice.js",
+    "out/sinfoservice.d.ts"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test-compile": "tsc -p ./",
+    "compile": "tsc -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "mocha ./out/test"
+  },
+  "devDependencies": {
+    "@types/chai": "^4.3.11",
+    "@types/chai-as-promised": "^7.1.8",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.10.4",
+    "@types/sinon": "^17.0.2",
+    "chai": "^4.3.10",
+    "chai-as-promised": "^7.1.1",
+    "esbuild": "^0.19.9",
+    "eslint": "^8.56.0",
+    "eslint-config-standard-with-typescript": "^43.0.0",
+    "mocha": "^10.2.0",
+    "sinon": "^17.0.1",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@nfogh/promise-socket": "^7.0.1",
+    "@typescript-eslint/parser": "^6.15.0",
+    "node-bufferreader": "^1.0.0",
+    "prettier": "^3.1.1"
+  }
+}
