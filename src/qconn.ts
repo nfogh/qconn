@@ -1,6 +1,11 @@
 import { newQConnClient } from './qconnutils';
 import { ProcessInfo, SInfoService } from './sinfoservice';
 
+export { CntlService, SignalType } from './cntlservice';
+export { FileService, Permissions, OpenFlags } from './fileservice';
+export { LauncherService } from './launcherservice';
+export { SInfoService } from './sinfoservice';
+
 interface QConnInfo {
   endian: string
   hasVersion: string
