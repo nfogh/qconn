@@ -19,14 +19,14 @@ interface QConnInfo {
 }
 
 export async function getInfo(host: string, port: number = 8000): Promise<QConnInfo> {
-  const socket = await newQConnClient(host, port)
-  await socket.write('info\r\n')
-  const response = await socket.read('\r\n')
-  const tokens = response.toString('utf8').replace('\r\n', '').split(' ')
-  const map = new Map<string, string>()
+  const socket = await newQConnClient(host, port);
+  await socket.write('info\r\n');
+  const response = await socket.read('\r\n');
+  const tokens = response.toString('utf8').replace('\r\n', '').split(' ');
+  const map = new Map<string, string>();
   for (const token of tokens) {
-    const [key, value] = token.split('=')
-    map.set(key, value)
+    const [key, value] = token.split('=');
+    map.set(key, value);
   }
 
   return {
@@ -44,14 +44,14 @@ export async function getInfo(host: string, port: number = 8000): Promise<QConnI
     sysname: map.get('SYSNAME') ?? 'unknown',
     domain: map.get('DOMAIN') ?? 'unknown',
     numSrvcs: map.get('NUM_SRVCS') ?? 'unknown'
-  }
+  };
 }
 
 export async function getPids(host: string, port: number = 8000): Promise<Map<number, ProcessInfo>> {
-  const service = await SInfoService.connect(host, port)
+  const service = await SInfoService.connect(host, port);
   try {
-    return await service.getPids()
+    return await service.getPids();
   } finally {
-    await service.disconnect()
+    await service.disconnect();
   }
 }

@@ -1,6 +1,6 @@
-import { BufferReader } from 'node-bufferreader'
-import type { PacketizedSocket } from './packetizedSocket'
-import { newQConnClient, activateService } from './qconnutils'
+import { BufferReader } from 'node-bufferreader';
+import type { PacketizedSocket } from './packetizedSocket';
+import { newQConnClient, activateService } from './qconnutils';
 
 export interface ProcessInfo {
   pid: number
@@ -39,62 +39,62 @@ export interface ProcessInfo {
 }
 
 function toNullTerminatedString(buffer: Buffer): string {
-  const nullTerminatorIndex = buffer.indexOf(0)
+  const nullTerminatorIndex = buffer.indexOf(0);
   if (nullTerminatorIndex === -1) {
-    throw new Error('Could not find null terminator in buffer')
+    throw new Error('Could not find null terminator in buffer');
   }
-  return buffer.subarray(0, nullTerminatorIndex).toString('utf8')
+  return buffer.subarray(0, nullTerminatorIndex).toString('utf8');
 }
 
 export class SInfoService implements AsyncDisposable {
-  private readonly host: string
-  private readonly port: number
-  private _socket: PacketizedSocket | undefined = undefined
+  private readonly host: string;
+  private readonly port: number;
+  private _socket: PacketizedSocket | undefined = undefined;
 
   private constructor(host: string, port: number = 8000) {
-    this.host = host
-    this.port = port
+    this.host = host;
+    this.port = port;
   }
 
   get socket(): PacketizedSocket {
     if (this._socket === undefined) {
-      throw new Error('Connection is undefined')
+      throw new Error('Connection is undefined');
     }
     return this._socket;
   }
 
   async [Symbol.asyncDispose](): Promise<void> {
-    await this.disconnect()
+    await this.disconnect();
   }
 
   async disconnect(): Promise<void> {
     if (this._socket !== undefined) {
-      await this.socket.write('done\r\n')
-      await this._socket.end()
-      this._socket = undefined
+      await this.socket.write('done\r\n');
+      await this._socket.end();
+      this._socket = undefined;
     }
   }
 
   static async connect(host: string, port: number = 8000): Promise<SInfoService> {
-    const service = new SInfoService(host, port)
-    service._socket = await newQConnClient(host, port)
-    await activateService(service._socket, 'sinfo')
-    return service
+    const service = new SInfoService(host, port);
+    service._socket = await newQConnClient(host, port);
+    await activateService(service._socket, 'sinfo');
+    return service;
   }
 
   async getPids(): Promise<Map<number, ProcessInfo>> {
-    await this.socket.write('get pids\r\n')
-    const pidHeader = await this.socket.read(28)
+    await this.socket.write('get pids\r\n');
+    const pidHeader = await this.socket.read(28);
     // 4th int is the payload length
-    const dataSize = pidHeader.readInt32LE(4 * 3)
-    const data = await this.socket.read(dataSize)
+    const dataSize = pidHeader.readInt32LE(4 * 3);
+    const data = await this.socket.read(dataSize);
 
     // Each process uses 296 bytes
-    const map = new Map<number, ProcessInfo>()
-    const chunkSize = 296
+    const map = new Map<number, ProcessInfo>();
+    const chunkSize = 296;
     for (let i = 0; i < data.length / chunkSize; i++) {
-      const chunk = new BufferReader(data.subarray(i * chunkSize, ((i + 1) * chunkSize)))
-      const pid = chunk.readInt32LE()
+      const chunk = new BufferReader(data.subarray(i * chunkSize, ((i + 1) * chunkSize)));
+      const pid = chunk.readInt32LE();
 
       const processInfo: ProcessInfo = {
         pid,
@@ -130,10 +130,10 @@ export class SInfoService implements AsyncDisposable {
         stacksize: chunk.readInt32LE(),
         vStacksize: chunk.readInt32LE(),
         path: toNullTerminatedString(chunk.readBuffer(128))
-      }
-      map.set(pid, processInfo)
+      };
+      map.set(pid, processInfo);
     }
 
-    return map
+    return map;
   }
 }

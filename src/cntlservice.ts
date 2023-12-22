@@ -41,14 +41,14 @@ export class CntlService implements AsyncDisposable {
   }
 
   static async connect(host: string, port: number = 8000): Promise<CntlService> {
-    const service = new CntlService(host, port)
-    service._socket = await newQConnClient(host, port)
-    await activateService(service._socket, 'cntl')
-    return service
+    const service = new CntlService(host, port);
+    service._socket = await newQConnClient(host, port);
+    await activateService(service._socket, 'cntl');
+    return service;
   }
 
   async signalProcess(pid: number, signal: SignalType = SignalType.kill): Promise<void> {
-    await this.socket.write('kill ' + pid.toString() + ' ' + signal.toString() + '\r\n')
-    await this.socket.read('ok\r\n')
+    await this.socket.write('kill ' + pid.toString() + ' ' + signal.toString() + '\r\n');
+    await this.socket.read('ok\r\n');
   }
 }
