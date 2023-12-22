@@ -19,18 +19,25 @@ export enum OpenFlags {
 }
 
 export enum Permissions {
-  S_IXOTH = 1 << 0,
-  S_IWOTH = 1 << 1,
-  S_IROTH = 1 << 2,
-  S_IXGRP = 1 << 3,
-  S_IWGRP = 1 << 4,
-  S_IRGRP = 1 << 5,
-  S_IXUSR = 1 << 6,
-  S_IWUSR = 1 << 7,
-  S_IRUSR = 1 << 8,
-  S_IFDIR = 0x4000,
-  S_IFREG = 0x8000
-}
+  S_IXOTH  = 1 << 0,
+  S_IWOTH  = 1 << 1,
+  S_IROTH  = 1 << 2,
+  S_IXGRP  = 1 << 3,
+  S_IWGRP  = 1 << 4,
+  S_IRGRP  = 1 << 5,
+  S_IXUSR  = 1 << 6,
+  S_IWUSR  = 1 << 7,
+  S_IRUSR  = 1 << 8,
+  S_IFMT   = 0xF000,
+  S_IFIFO  = 0x1000,
+  S_IFCHR  = 0x2000,
+  S_IFDIR  = 0x4000,
+  S_IFNAM  = 0x5000,
+  S_IFBLK  = 0x6000,
+  S_IFREG  = 0x8000,
+  S_IFLNK  = 0xA000,
+  S_IFSOCK = 0xC000
+  }
 
 export interface FileStat {
   ino: number
@@ -138,7 +145,7 @@ export class FileService implements AsyncDisposable {
 
       return entries.filter((entry) => entry !== '.' && entry !== '..')
     } finally {
-      await this.close(directoryFileId)
+      await this.close(directoryFileId);
     }
   }
 

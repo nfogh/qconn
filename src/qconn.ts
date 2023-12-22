@@ -1,5 +1,5 @@
-import { newQConnClient } from './qconnutils'
-import { ProcessInfo, SInfoService } from './sinfoservice'
+import { newQConnClient } from './qconnutils';
+import { ProcessInfo, SInfoService } from './sinfoservice';
 
 interface QConnInfo {
   endian: string
