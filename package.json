@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nfogh/qconn"
+    "url": "git+https://github.com/nfogh/qconn.git"
   },
   "files": [
     "out/cntlservice.js",
