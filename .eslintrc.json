@@ -1,29 +1,30 @@
 {
-    "env": {
-        "browser": true,
-        "es2021": true
-    },
-    "extends": "standard-with-typescript",
+    "root": true,
+    "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "ecmaVersion": "latest",
+        "ecmaVersion": 6,
         "sourceType": "module"
     },
+    "plugins": [
+        "@typescript-eslint"
+    ],
     "rules": {
-        "@typescript-eslint/naming-convention": "warn",
-        "@typescript-eslint/semi": "off",
+        "@typescript-eslint/naming-convention": [
+            "warn",
+            {
+                "selector": "import",
+                "format": [ "camelCase", "PascalCase" ]
+            }
+        ],
+        "@typescript-eslint/semi": "warn",
         "curly": "warn",
         "eqeqeq": "warn",
         "no-throw-literal": "warn",
-        "semi": "off",
-        "space-before-function-paren": "off",
-        "@typescript-eslint/space-before-function-paren": "off",
-        "no-multi-spaces": "off",
-        "no-lone-blocks": "off"
+        "semi": "off"
     },
     "ignorePatterns": [
         "out",
         "dist",
-        "node_modules",
         "**/*.d.ts"
     ]
 }

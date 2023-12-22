@@ -1,5 +1,5 @@
-import type { PacketizedSocket } from './packetizedSocket'
-import { newQConnClient, activateService } from './qconnutils'
+import type { PacketizedSocket } from './packetizedSocket';
+import { newQConnClient, activateService } from './qconnutils';
 
 export enum SignalType {
   hup = 1,
@@ -12,31 +12,31 @@ export enum SignalType {
 };
 
 export class CntlService implements AsyncDisposable {
-  private readonly host: string
-  private readonly port: number
-  private _socket: PacketizedSocket | undefined = undefined
+  private readonly host: string;
+  private readonly port: number;
+  private _socket: PacketizedSocket | undefined = undefined;
 
   private constructor(host: string, port: number = 8000) {
-    this.host = host
-    this.port = port
+    this.host = host;
+    this.port = port;
   }
 
   get socket(): PacketizedSocket {
     if (this._socket === undefined) {
-      throw new Error('Connection is undefined')
+      throw new Error('Connection is undefined');
     }
     return this._socket;
   }
 
   async [Symbol.asyncDispose](): Promise<void> {
-    await this.disconnect()
+    await this.disconnect();
   }
 
   async disconnect(): Promise<void> {
     if (this._socket !== undefined) {
-      await this.socket.write('quit\r\n')
-      await this.socket.end()
-      this._socket = undefined
+      await this.socket.write('quit\r\n');
+      await this.socket.end();
+      this._socket = undefined;
     }
   }
 

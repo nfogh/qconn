@@ -2,9 +2,13 @@
   "name": "qconn",
   "version": "1.0.0",
   "description": "QNX qconn utilities",
-  "main": "out/index.js",
+  "main": "out/qconn.js",
   "author": "Nikolaj Fogh",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nfogh/qconn"
+  },
   "files": [
     "out/cntlservice.js",
     "out/cntservice.d.ts",
