@@ -52,7 +52,7 @@ function toNullTerminatedString(buffer: Buffer): string {
   return buffer.subarray(0, nullTerminatorIndex).toString('utf8');
 }
 
-export class SInfoService implements AsyncDisposable {
+export class SInfoService {
   private readonly host: string;
   private readonly port: number;
   private _socket: PacketizedSocket | undefined = undefined;
@@ -67,10 +67,6 @@ export class SInfoService implements AsyncDisposable {
       throw new Error('Connection is undefined');
     }
     return this._socket;
-  }
-
-  async [Symbol.asyncDispose](): Promise<void> {
-    await this.disconnect();
   }
 
   async disconnect(): Promise<void> {
