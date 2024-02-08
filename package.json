@@ -1,6 +1,6 @@
 {
   "name": "qconn",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "QNX qconn utilities",
   "main": "out/qconn.js",
   "author": "Nikolaj Fogh",
@@ -11,15 +11,17 @@
   },
   "files": [
     "out/cntlservice.js",
-    "out/cntservice.d.ts",
+    "out/cntlservice.d.ts",
     "out/fileservice.js",
     "out/fileservice.d.ts",
-    "out/launchservice.js",
-    "out/launchservice.d.ts",
+    "out/launcherservice.js",
+    "out/launcherservice.d.ts",
     "out/packetizedSocket.js",
     "out/packetizedSocket.d.ts",
-    "out/qconnutil.js",
-    "out/qconnutil.d.ts",
+    "out/qconn.js",
+    "out/qconn.d.ts",
+    "out/qconnutils.js",
+    "out/qconnutils.d.ts",
     "out/sinfoservice.js",
     "out/sinfoservice.d.ts"
   ],
@@ -37,19 +39,19 @@
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.10.4",
     "@types/sinon": "^17.0.2",
+    "@typescript-eslint/parser": "^6.15.0",
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",
     "esbuild": "^0.19.9",
     "eslint": "^8.56.0",
     "eslint-config-standard-with-typescript": "^43.0.0",
     "mocha": "^10.2.0",
+    "prettier": "^3.1.1",
     "sinon": "^17.0.1",
     "typescript": "^5.3.3"
   },
   "dependencies": {
     "@nfogh/promise-socket": "^7.0.1",
-    "@typescript-eslint/parser": "^6.15.0",
-    "node-bufferreader": "^1.0.0",
-    "prettier": "^3.1.1"
+    "node-bufferreader": "^1.0.0"
   }
 }

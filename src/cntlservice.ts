@@ -11,7 +11,7 @@ export enum SignalType {
   usr2 = 17
 };
 
-export class CntlService implements AsyncDisposable {
+export class CntlService {
   private readonly host: string;
   private readonly port: number;
   private _socket: PacketizedSocket | undefined = undefined;
@@ -26,10 +26,6 @@ export class CntlService implements AsyncDisposable {
       throw new Error('Connection is undefined');
     }
     return this._socket;
-  }
-
-  async [Symbol.asyncDispose](): Promise<void> {
-    await this.disconnect();
   }
 
   async disconnect(): Promise<void> {

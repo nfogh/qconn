@@ -1,6 +1,13 @@
 import type { PacketizedSocket } from './packetizedSocket';
 import { newQConnClient, activateService } from './qconnutils';
 
+export class FileServiceError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'FileSystemError';
+  }
+}
+
 function removeLineBreaksFromEnd(inputString: string): string {
   const regex = /\r?\n$/;
   const resultString = inputString.replace(regex, '');
@@ -19,25 +26,25 @@ export enum OpenFlags {
 }
 
 export enum Permissions {
-  S_IXOTH  = 1 << 0,
-  S_IWOTH  = 1 << 1,
-  S_IROTH  = 1 << 2,
-  S_IXGRP  = 1 << 3,
-  S_IWGRP  = 1 << 4,
-  S_IRGRP  = 1 << 5,
-  S_IXUSR  = 1 << 6,
-  S_IWUSR  = 1 << 7,
-  S_IRUSR  = 1 << 8,
-  S_IFMT   = 0xF000,
-  S_IFIFO  = 0x1000,
-  S_IFCHR  = 0x2000,
-  S_IFDIR  = 0x4000,
-  S_IFNAM  = 0x5000,
-  S_IFBLK  = 0x6000,
-  S_IFREG  = 0x8000,
-  S_IFLNK  = 0xA000,
+  S_IXOTH = 1 << 0,
+  S_IWOTH = 1 << 1,
+  S_IROTH = 1 << 2,
+  S_IXGRP = 1 << 3,
+  S_IWGRP = 1 << 4,
+  S_IRGRP = 1 << 5,
+  S_IXUSR = 1 << 6,
+  S_IWUSR = 1 << 7,
+  S_IRUSR = 1 << 8,
+  S_IFMT = 0xF000,
+  S_IFIFO = 0x1000,
+  S_IFCHR = 0x2000,
+  S_IFDIR = 0x4000,
+  S_IFNAM = 0x5000,
+  S_IFBLK = 0x6000,
+  S_IFREG = 0x8000,
+  S_IFLNK = 0xA000,
   S_IFSOCK = 0xC000
-  }
+}
 
 export interface FileStat {
   ino: number
@@ -57,7 +64,7 @@ export interface FileStat {
   blocks: number
 }
 
-export class FileService implements AsyncDisposable {
+export class FileService {
   private readonly host: string;
   private readonly port: number;
   private _socket: PacketizedSocket | undefined = undefined;
@@ -72,10 +79,6 @@ export class FileService implements AsyncDisposable {
       throw new Error('Connection is undefined');
     }
     return this._socket;
-  }
-
-  async [Symbol.asyncDispose](): Promise<void> {
-    await this.disconnect();
   }
 
   async disconnect(): Promise<void> {
@@ -98,11 +101,11 @@ export class FileService implements AsyncDisposable {
     const response = (await this.socket.read('\r\n')).toString('utf8');
     const responseFields = response.split(':');
     if (responseFields.length === 2 && responseFields[0] === 'e') {
-      throw new Error(`Unable to delete ${path}: ${removeLineBreaksFromEnd(responseFields[1])}`);
+      throw new FileServiceError(`Unable to delete ${path}: ${removeLineBreaksFromEnd(responseFields[1])}`);
     } else if (responseFields.length !== 1) {
-      throw new Error(`Invalid response. Number of fields should have been 1. Reply was ${response}`);
+      throw new FileServiceError(`Invalid response. Number of fields should have been 1. Reply was ${response}`);
     } else if (responseFields[0] !== 'o\r\n') {
-      throw new Error(`Response was not 'o'. It was ${response}`);
+      throw new FileServiceError(`Response was not 'o'. It was ${response}`);
     }
   }
 
@@ -111,11 +114,11 @@ export class FileService implements AsyncDisposable {
     const response = (await this.socket.read('\r\n')).toString('utf8');
     const responseFields = response.split(':');
     if (responseFields.length === 2 && responseFields[0] === 'e') {
-      throw new Error(`Unable to move ${sourcePath} to ${destPath}: ${removeLineBreaksFromEnd(responseFields[1])}`);
+      throw new FileServiceError(`Unable to move ${sourcePath} to ${destPath}: ${removeLineBreaksFromEnd(responseFields[1])}`);
     } else if (responseFields.length !== 1) {
-      throw new Error(`Invalid response. Number of fields should have been 1. Reply was ${response}`);
+      throw new FileServiceError(`Invalid response. Number of fields should have been 1. Reply was ${response}`);
     } else if (responseFields[0] !== 'o\r\n') {
-      throw new Error(`Response was not 'o'. It was ${response}`);
+      throw new FileServiceError(`Response was not 'o'. It was ${response}`);
     }
   }
 
@@ -132,10 +135,10 @@ export class FileService implements AsyncDisposable {
 
         const readFields = readResponse.split(':');
         if (readFields.length !== 4) {
-          throw new Error(`Invalid response. Number of fields should have been 4. Reply was ${readResponse}`);
+          throw new FileServiceError(`Invalid response. Number of fields should have been 4. Reply was ${readResponse}`);
         }
         if (readFields[0] !== 'o') {
-          throw new Error(`Response was not 'o'. It was ${readResponse}`);
+          throw new FileServiceError(`Response was not 'o'. It was ${readResponse}`);
         }
         length = parseInt(readFields[2], 16);
 
@@ -152,7 +155,7 @@ export class FileService implements AsyncDisposable {
   // Opens a file and returns the file descriptor
   async open(path: string, openFlags: OpenFlags, permissions?: Permissions): Promise<number> {
     if (((openFlags & OpenFlags.O_CREAT) === OpenFlags.O_CREAT) && (permissions === undefined)) {
-      throw new Error('You must set permissions if you are creating a file');
+      throw new FileServiceError('You must set permissions if you are creating a file');
     }
 
     let openString = `o:"${path}":${openFlags.toString(16)}`;
@@ -165,11 +168,11 @@ export class FileService implements AsyncDisposable {
     const responseFields = response.split(':');
 
     if (responseFields.length === 2 && responseFields[0] === 'e') {
-      throw new Error(`Unable to open file: ${removeLineBreaksFromEnd(responseFields[1])}`);
+      throw new FileServiceError(`Unable to open file: ${removeLineBreaksFromEnd(responseFields[1])}`);
     } else if (responseFields.length !== 5) {
-      throw new Error(`Invalid response. Number of fields should have been 5. Reply was ${response}`);
+      throw new FileServiceError(`Invalid response. Number of fields should have been 5. Reply was ${response}`);
     } else if (responseFields[0] !== 'o') {
-      throw new Error(`Response was not 'o'. It was ${response}`);
+      throw new FileServiceError(`Response was not 'o'. It was ${response}`);
     }
     return parseInt(responseFields[1]);
   }
@@ -179,11 +182,11 @@ export class FileService implements AsyncDisposable {
     const response = (await this.socket.read('\r\n')).toString();
     const responseFields = response.split(':');
     if (responseFields.length === 2 && responseFields[0] === 'e') {
-      throw new Error(`Unable to open file: ${removeLineBreaksFromEnd(responseFields[1])}`);
+      throw new FileServiceError(`Unable to open file: ${removeLineBreaksFromEnd(responseFields[1])}`);
     } else if (responseFields.length !== 16) {
-      throw new Error(`Invalid response. Number of fields should have been 16. Reply was ${response}`);
+      throw new FileServiceError(`Invalid response. Number of fields should have been 16. Reply was ${response}`);
     } else if (responseFields[0] !== 'o') {
-      throw new Error(`Response was not 'o'. It was ${response}`);
+      throw new FileServiceError(`Response was not 'o'. It was ${response}`);
     }
 
     const processInfo: FileStat = {
@@ -208,22 +211,22 @@ export class FileService implements AsyncDisposable {
 
   async read(fileDescriptor: number, size: number, offset: number = 0): Promise<Buffer> {
     if (size > 2 * 1024) {
-      throw new Error('size must be less or equal to 2KB');
+      throw new FileServiceError('size must be less or equal to 2KB');
     }
 
     await this.socket.write(`r:${fileDescriptor}:${offset.toString(16)}:${size.toString(16)}:0\r\n`);
     const readResponse = await this.socket.read('\r\n');
     const readFields = readResponse.toString('utf8').split(':');
     if (readFields.length !== 4) {
-      throw new Error(`Invalid response. Number of fields should have been 4. Reply was ${readResponse.toString()}`);
+      throw new FileServiceError(`Invalid response. Number of fields should have been 4. Reply was ${readResponse.toString()}`);
     }
     if (readFields[0] !== 'o') {
-      throw new Error(`Response was not 'o'. It was ${readResponse.toString()}`);
+      throw new FileServiceError(`Response was not 'o'. It was ${readResponse.toString()}`);
     }
     const numRead = parseInt(readFields[1], 16);
     const chunk = await this.socket.read(numRead);
     if (!(chunk instanceof Buffer)) {
-      throw new Error('Error. Chunk is not an instance of a buffer.');
+      throw new FileServiceError('Error. Chunk is not an instance of a buffer.');
     }
     return chunk;
   }
@@ -247,13 +250,13 @@ export class FileService implements AsyncDisposable {
     const readFields = readResponse.split(':');
     const numWritten = parseInt(readFields[1], 16);
     if (readFields.length !== 3) {
-      throw new Error(`Invalid response. Number of fields should have been 3. Reply was ${readResponse}`);
+      throw new FileServiceError(`Invalid response. Number of fields should have been 3. Reply was ${readResponse}`);
     }
     if (readFields[0] !== 'o') {
-      throw new Error(`Response was not 'o'. It was ${readResponse}`);
+      throw new FileServiceError(`Response was not 'o'. It was ${readResponse}`);
     }
     if (numWritten !== data.length) {
-      throw new Error(`Could not write whole chunk of ${data.length} bytes. Only wrote ${numWritten} bytes`);
+      throw new FileServiceError(`Could not write whole chunk of ${data.length} bytes. Only wrote ${numWritten} bytes`);
     }
   }
 
@@ -262,9 +265,9 @@ export class FileService implements AsyncDisposable {
     const response = await this.socket.read('\r\n');
     const responseFields = response.toString('utf8').split(':');
     if (responseFields.length === 2 && responseFields[0] === 'e') {
-      throw new Error(`Could not close file: ${removeLineBreaksFromEnd(responseFields[1])}`);
+      throw new FileServiceError(`Could not close file: ${removeLineBreaksFromEnd(responseFields[1])}`);
     } else if (responseFields[0] !== 'o\r\n') {
-      throw new Error(`Could not close file. Unknown error: ${response.toString('utf8')}`);
+      throw new FileServiceError(`Could not close file. Unknown error: ${response.toString('utf8')}`);
     }
   }
 }
