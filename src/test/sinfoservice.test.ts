@@ -18,12 +18,16 @@ describe('sinfoservice', () => {
 
   describe('getSysInfo', () => {
     it('should get system info', async () => {
-      await using service = await SInfoService.connect('192.168.23.128');
-      const sysinfo = await service.getSysInfo();
+      const service = await SInfoService.connect('192.168.23.128');
+      try {
+        const sysinfo = await service.getSysInfo();
 
-      expect(sysinfo.hostname).to.equal('localhost');
-      expect(sysinfo.memTotal === BigInt(12345)).to.be.true;
-      expect(sysinfo.memFree >= sysinfo.memTotal).to.be.true;
+        expect(sysinfo.hostname).to.equal('localhost');
+        expect(sysinfo.memTotal === BigInt(267974656)).to.be.true;
+        expect(sysinfo.memFree <= sysinfo.memTotal).to.be.true;
+      } finally {
+        await service.disconnect();
+      }
     }).timeout(100000);
   });
 });
