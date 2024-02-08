@@ -86,15 +86,16 @@ export class SInfoService {
 
   async getSysInfo(): Promise<SysInfo> {
     await this.socket.write("get sysinfo\r\n");
-    await this.socket.read(7 * 4); // TODO: What is this
-    const hostnameLengthBuf = await this.socket.read(2);
-    const hostnameLength = hostnameLengthBuf.readInt16LE();
-    const hostname = (await this.socket.read(hostnameLength)).toString('utf8');
-    await this.socket.read(4); // TODO: What is this
-    await this.socket.read(2); // TODO: What is this
-    const memTotal = (await this.socket.read(8)).readBigUInt64LE();
-    const memFree = (await this.socket.read(8)).readBigUint64LE();
-    await this.socket.read(9 * 4);
+    await this.socket.read(8);
+    const datalen = (await this.socket.read(4)).readInt32LE() - 8;
+    const packet = new BufferReader(await this.socket.read(datalen));
+    packet.readBuffer(4 * 4);
+    const hostnameLength = packet.readInt16LE();
+    const hostname = packet.readBuffer(hostnameLength).toString('utf8');
+    packet.readBuffer(4); // TODO: What is this
+    packet.readBuffer(2); // TODO: What is this
+    const memTotal = packet.readBigUInt64LE();
+    const memFree = packet.readBigInt64LE();
 
     return { hostname, memTotal, memFree };
   }

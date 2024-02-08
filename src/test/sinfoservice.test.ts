@@ -25,6 +25,12 @@ describe('sinfoservice', () => {
         expect(sysinfo.hostname).to.equal('localhost');
         expect(sysinfo.memTotal === BigInt(267974656)).to.be.true;
         expect(sysinfo.memFree <= sysinfo.memTotal).to.be.true;
+
+        const sysinfo2 = await service.getSysInfo();
+
+        expect(sysinfo2.hostname).to.equal('localhost');
+        expect(sysinfo2.memTotal === BigInt(267974656)).to.be.true;
+        expect(sysinfo2.memFree <= sysinfo2.memTotal).to.be.true;
       } finally {
         await service.disconnect();
       }
