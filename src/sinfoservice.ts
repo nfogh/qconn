@@ -94,6 +94,7 @@ export class SInfoService {
     await this.socket.read(2); // TODO: What is this
     const memTotal = (await this.socket.read(8)).readBigUInt64LE();
     const memFree = (await this.socket.read(8)).readBigUint64LE();
+    await this.socket.read(9 * 4);
 
     return { hostname, memTotal, memFree };
   }
