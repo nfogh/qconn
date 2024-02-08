@@ -15,4 +15,19 @@ describe('sinfoservice', () => {
       }
     }).timeout(100000);
   });
+
+  describe('getSysInfo', () => {
+    it('should get system info', async () => {
+      const service = await SInfoService.connect('192.168.23.128');
+      try {
+        const sysinfo = await service.getSysInfo();
+
+        expect(sysinfo.hostname).to.equal('localhost');
+        expect(sysinfo.memTotal === BigInt(267974656)).to.be.true;
+        expect(sysinfo.memFree <= sysinfo.memTotal).to.be.true;
+      } finally {
+        await service.disconnect();
+      }
+    }).timeout(100000);
+  });
 });
