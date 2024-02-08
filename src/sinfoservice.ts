@@ -2,6 +2,12 @@ import { BufferReader } from 'node-bufferreader';
 import type { PacketizedSocket } from './packetizedSocket';
 import { newQConnClient, activateService } from './qconnutils';
 
+export interface SysInfo {
+  hostname: string
+  memTotal: bigint
+  memFree: bigint
+};
+
 export interface ProcessInfo {
   pid: number
   path: string
@@ -80,6 +86,21 @@ export class SInfoService implements AsyncDisposable {
     service._socket = await newQConnClient(host, port);
     await activateService(service._socket, 'sinfo');
     return service;
+  }
+
+  async getSysInfo(): Promise<SysInfo>
+  {
+    await this.socket.write("get sysinfo");
+    await this.socket.read(7*4); // TODO: What is this
+    const hostnameLengthBuf = await this.socket.read(2);
+    const hostnameLength = hostnameLengthBuf.readInt16LE();
+    const hostname = (await this.socket.read(hostnameLength)).toString('utf8');
+    await this.socket.read(4); // TODO: What is this
+    await this.socket.read(2); // TODO: What is this
+    const memFree = (await this.socket.read(8)).readBigUInt64LE();
+    const memTotal = (await this.socket.read(8)).readBigUint64LE();
+
+    return {hostname, memTotal, memFree};
   }
 
   async getPids(): Promise<Map<number, ProcessInfo>> {
