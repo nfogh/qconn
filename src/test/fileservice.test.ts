@@ -3,10 +3,12 @@ import { expect, use as chaiUse } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 chaiUse(chaiAsPromised);
 
+const ip = "192.168.23.128";
+
 describe('fileservice', () => {
   describe('stat', () => {
     it('should return the expected result', async () => {
-      const service = await FileService.connect('192.168.23.128');
+      const service = await FileService.connect(ip);
       try {
         const fd = await service.open('/bin/sh', OpenFlags.O_RDONLY);
         try {
@@ -24,7 +26,7 @@ describe('fileservice', () => {
 
   describe('list', () => {
     it('should return the expected result', async () => {
-      const service = await FileService.connect('192.168.23.128');
+      const service = await FileService.connect(ip);
       try {
         const dirList = await service.list('/');
 
@@ -39,7 +41,7 @@ describe('fileservice', () => {
   describe('mkDir', () => {
     it('should be able to create a directory if one doesnt exist', async () => {
       {
-        const service = await FileService.connect('192.168.23.128');
+        const service = await FileService.connect(ip);
         try {
           await service.open('/tmp/mytestdir', OpenFlags.O_CREAT | OpenFlags.O_WRONLY, Permissions.S_IFDIR | Permissions.S_IRUSR | Permissions.S_IWUSR);
         } finally {
@@ -47,7 +49,7 @@ describe('fileservice', () => {
         }
       }
       {
-        const service = await FileService.connect('192.168.23.128');
+        const service = await FileService.connect(ip);
         try {
           const dirList = await service.list('/tmp');
           expect(dirList).to.include.members(['mytestdir']);
@@ -63,7 +65,7 @@ describe('fileservice', () => {
 
   describe('mkDir', () => {
     it('should not be able to create a directory if it already exists', async () => {
-      const service = await FileService.connect('192.168.23.128');
+      const service = await FileService.connect(ip);
       try {
         await expect((async () => {
           await service.open('/tmp', OpenFlags.O_CREAT | OpenFlags.O_WRONLY, Permissions.S_IFDIR | Permissions.S_IRUSR | Permissions.S_IWUSR);
@@ -76,7 +78,7 @@ describe('fileservice', () => {
 
   describe('readFile', () => {
     it('should be able to read /bin/sh', async () => {
-      const service = await FileService.connect('192.168.23.128');
+      const service = await FileService.connect(ip);
       try {
         const fd = await service.open('/bin/sh', OpenFlags.O_RDONLY);
         try {
@@ -94,7 +96,7 @@ describe('fileservice', () => {
 
   describe('writeFile', () => {
     it('should create a file', async () => {
-      const service = await FileService.connect('192.168.23.128');
+      const service = await FileService.connect(ip);
       try {
         const fdWrite = await service.open('/tmp/myfile.txt', OpenFlags.O_CREAT | OpenFlags.O_WRONLY, Permissions.S_IRUSR | Permissions.S_IWUSR);
         try {
@@ -121,7 +123,7 @@ describe('fileservice', () => {
 
   it('should overwrite file when file exists and overwrite flag is set', async () => {
     {
-      const service = await FileService.connect('192.168.23.128');
+      const service = await FileService.connect(ip);
       try {
         const fd = await service.open('/tmp/myfile.txt', OpenFlags.O_CREAT | OpenFlags.O_WRONLY | OpenFlags.O_TRUNC, Permissions.S_IRUSR | Permissions.S_IWUSR);
         try {
@@ -135,7 +137,7 @@ describe('fileservice', () => {
     }
 
     await expect((async () => {
-      const service = await FileService.connect('192.168.23.128');
+      const service = await FileService.connect(ip);
       try {
         const fd = await service.open('/tmp/myfile.txt', OpenFlags.O_CREAT | OpenFlags.O_WRONLY | OpenFlags.O_TRUNC, Permissions.S_IRUSR | Permissions.S_IWUSR);
         await service.close(fd);
@@ -148,7 +150,7 @@ describe('fileservice', () => {
 
   it('should fail if file doesnt exist, and create mode is not set', async () => {
     await expect((async () => {
-      const service = await FileService.connect('192.168.23.128');
+      const service = await FileService.connect(ip);
       try {
         const fd = await service.open('/tmp/myfile.txt', OpenFlags.O_WRONLY, Permissions.S_IRUSR | Permissions.S_IWUSR);
         await service.close(fd);

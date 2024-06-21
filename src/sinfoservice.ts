@@ -8,6 +8,16 @@ export interface SysInfo {
   memFree: bigint
 };
 
+export interface ProcessMMap {
+  flags: number,
+  vAddr: bigint,
+  size: bigint,
+  offset: bigint,
+  device: number,
+  inode: number,
+  path: string
+};
+
 export interface ProcessInfo {
   pid: number
   path: string
@@ -98,6 +108,33 @@ export class SInfoService {
     const memFree = packet.readBigInt64LE();
 
     return { hostname, memTotal, memFree };
+  }
+
+  async getMMaps(pid: Number): Promise<ProcessMMap[]> {
+    await this.socket.write(`get mmaps ${pid}\r\n`);
+    const mmapHeader = await this.socket.read(28);
+    // 4th int is the payload length
+    const dataSize = mmapHeader.readInt32LE(4 * 3);
+    const data = await this.socket.read(dataSize);
+
+    // Each mmap uses 164 bytes
+    const map: ProcessMMap[] = [];
+    const chunkSize = 164;
+    for (let i = 0; i < data.length / chunkSize; i++) {
+      const chunk = new BufferReader(data.subarray(i * chunkSize, ((i + 1) * chunkSize)));
+      
+      map.push({
+        flags: chunk.readUInt32LE(),
+        vAddr: chunk.readBigUInt64LE(),
+        size: chunk.readBigUInt64LE(),
+        offset: chunk.readBigUInt64LE(),
+        device: chunk.readUInt32LE(),
+        inode: chunk.readUInt32LE(),
+        path: chunk.readBuffer(128).toString()
+      });
+    }
+
+    return map;
   }
 
   async getPids(): Promise<Map<number, ProcessInfo>> {

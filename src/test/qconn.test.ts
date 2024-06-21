@@ -3,10 +3,12 @@ import { expect, use as chaiUse } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 chaiUse(chaiAsPromised);
 
+const ip = "192.168.23.128";
+
 describe('qconn', () => {
   describe('getInfo', () => {
     it('should get info from system', async () => {
-      const info = await qconn.getInfo('192.168.23.128');
+      const info = await qconn.getInfo(ip);
 
       expect(info.endian).to.equal('le');
       expect(info.hasVersion).to.equal('1');

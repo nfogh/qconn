@@ -3,10 +3,12 @@ import { expect, use as chaiUse } from 'chai';
 import * as chaiAsPromised from 'chai-as-promised';
 chaiUse(chaiAsPromised);
 
+const ip = "192.168.23.128";
+
 describe('sinfoservice', () => {
   describe('getPids', () => {
     it('should get a list of processes', async () => {
-      const service = await SInfoService.connect('192.168.23.128');
+      const service = await SInfoService.connect(ip);
       try {
         const processes = await service.getPids();
         expect(processes.get(1)?.path).to.equal('proc/boot/procnto-instr');
@@ -16,9 +18,23 @@ describe('sinfoservice', () => {
     }).timeout(100000);
   });
 
+  describe('getMMaps', () => {
+    it('should get mmap', async () => {
+      const service = await SInfoService.connect(ip);
+      try {
+        const mmap = await service.getMMaps(1);
+        expect(mmap.length).to.be.equal(2);
+        console.log(mmap[0].path);
+        console.log(mmap[1].path);
+      } finally {
+        await service.disconnect();
+      }
+    });
+  });
+
   describe('getSysInfo', () => {
     it('should get system info', async () => {
-      const service = await SInfoService.connect('192.168.23.128');
+      const service = await SInfoService.connect(ip);
       try {
         const sysinfo = await service.getSysInfo();
 

@@ -232,14 +232,16 @@ export class FileService {
   }
 
   async readAll(fileDescriptor: number): Promise<Buffer> {
-    const fileSize = (await this.stat(fileDescriptor)).size;
-
     const chunks: Buffer[] = [];
-    const chunkSize = 2 * 1024;
-    for (let i = 0; i < fileSize / chunkSize; i++) {
-      const chunk = await this.read(fileDescriptor, chunkSize, i * chunkSize);
+    let chunkSize = 1024*2;
+    let offset = 0;
+    let numRead;
+    do {
+      const chunk = await this.read(fileDescriptor, chunkSize, offset);
       chunks.push(chunk);
-    }
+      numRead = chunk.byteLength;
+      offset += numRead;
+    } while (numRead !== 0);
     return Buffer.concat(chunks);
   }
 
