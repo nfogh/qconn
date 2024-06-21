@@ -1,5 +1,5 @@
 import { newQConnClient } from './qconnutils';
-import { ProcessInfo, SInfoService } from './sinfoservice';
+import { ProcessInfo, SInfoService, ProcessMMap } from './sinfoservice';
 
 export { CntlService, SignalType } from './cntlservice';
 export { FileService, Permissions, OpenFlags } from './fileservice';
@@ -56,6 +56,15 @@ export async function getPids(host: string, port: number = 8000): Promise<Map<nu
   const service = await SInfoService.connect(host, port);
   try {
     return await service.getPids();
+  } finally {
+    await service.disconnect();
+  }
+}
+
+export async function getMMaps(host: string, port: number = 8000): Promise<ProcessMMap[]> {
+  const service = await SInfoService.connect(host, port);
+  try {
+    return await service.getMMaps(1);
   } finally {
     await service.disconnect();
   }
