@@ -23,9 +23,12 @@ describe('sinfoservice', () => {
       const service = await SInfoService.connect(ip);
       try {
         const mmap = await service.getMMaps(1);
-        expect(mmap.length).to.be.equal(2);
-        console.log(mmap[0].path);
-        console.log(mmap[1].path);
+        const procntoInstr = mmap.filter(m => m.path === 'proc/boot/procnto-instr');
+        expect(procntoInstr.length).to.be.equal(2);
+        expect(procntoInstr[0].size).to.be.equal(BigInt(498972));
+        expect(procntoInstr[0].offset).to.be.equal(BigInt(0));
+        expect(procntoInstr[1].size).to.be.equal(BigInt(33068));
+        expect(procntoInstr[1].offset).to.be.equal(BigInt(499712));
       } finally {
         await service.disconnect();
       }

@@ -54,10 +54,10 @@ export interface ProcessInfo {
   vStacksize: number
 }
 
-function toNullTerminatedString(buffer: Buffer): string {
+function toString(buffer: Buffer): string {
   const nullTerminatorIndex = buffer.indexOf(0);
   if (nullTerminatorIndex === -1) {
-    throw new Error('Could not find null terminator in buffer');
+    return buffer.toString('utf8');
   }
   return buffer.subarray(0, nullTerminatorIndex).toString('utf8');
 }
@@ -101,7 +101,7 @@ export class SInfoService {
     const packet = new BufferReader(await this.socket.read(datalen));
     packet.readBuffer(4 * 4);
     const hostnameLength = packet.readInt16LE();
-    const hostname = packet.readBuffer(hostnameLength).toString('utf8');
+    const hostname = toString(packet.readBuffer(hostnameLength));
     packet.readBuffer(4); // TODO: What is this
     packet.readBuffer(2); // TODO: What is this
     const memTotal = packet.readBigUInt64LE();
@@ -110,7 +110,7 @@ export class SInfoService {
     return { hostname, memTotal, memFree };
   }
 
-  async getMMaps(pid: Number): Promise<ProcessMMap[]> {
+  async getMMaps(pid: number): Promise<ProcessMMap[]> {
     await this.socket.write(`get mmaps ${pid}\r\n`);
     const mmapHeader = await this.socket.read(28);
     // 4th int is the payload length
@@ -122,7 +122,7 @@ export class SInfoService {
     const chunkSize = 164;
     for (let i = 0; i < data.length / chunkSize; i++) {
       const chunk = new BufferReader(data.subarray(i * chunkSize, ((i + 1) * chunkSize)));
-      
+
       map.push({
         flags: chunk.readUInt32LE(),
         vAddr: chunk.readBigUInt64LE(),
@@ -130,7 +130,7 @@ export class SInfoService {
         offset: chunk.readBigUInt64LE(),
         device: chunk.readUInt32LE(),
         inode: chunk.readUInt32LE(),
-        path: chunk.readBuffer(128).toString()
+        path: toString(chunk.readBuffer(128))
       });
     }
 
@@ -184,7 +184,7 @@ export class SInfoService {
         datasize: chunk.readInt32LE(),
         stacksize: chunk.readInt32LE(),
         vStacksize: chunk.readInt32LE(),
-        path: toNullTerminatedString(chunk.readBuffer(128))
+        path: toString(chunk.readBuffer(128))
       };
       map.set(pid, processInfo);
     }
